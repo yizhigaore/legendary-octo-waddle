@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ 小会计的可爱主页 ✨</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', 'ZCOOL KuaiLe', sans-serif;
+    background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 30%, #e8eaf6 60%, #e0f7fa 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><text y='20' font-size='20'>🌸</text></svg>") 12 12, auto;
+  }
+
+  /* ===== 背景浮动装饰 ===== */
+  .bg-decorations {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .floating {
+    position: absolute;
+    animation: floatUp 12s linear infinite;
+    opacity: 0.7;
+    font-size: 28px;
+    user-select: none;
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(105vh) rotate(0deg) scale(0.5); opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
+  }
+
+  @keyframes floatLeftRight {
+    0%,100% { transform: translateX(0); }
+    50%     { transform: translateX(20px); }
+  }
+
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(-15px); }
+  }
+
+  @keyframes sparkle {
+    0%,100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50%     { transform: scale(1.5) rotate(180deg); opacity: 0.3; }
+  }
+
+  @keyframes wiggle {
+    0%,100% { transform: rotate(0deg); }
+    25%     { transform: rotate(-5deg); }
+    75%     { transform: rotate(5deg); }
+  }
+
+  /* ===== 主容器 ===== */
+  .main-container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 20px;
+  }
+
+  /* ===== 顶部导航小彩条 ===== */
+  .top-ribbon {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: wiggle 3s ease-in-out infinite;
+  }
+
+  .top-ribbon .ribbon-text {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fad0c4, #ff9a9e);
+    color: #fff;
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+  }
+
+  /* ===== 英雄区域 ===== */
+  .hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+
+  .avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .avatar-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd1d1, #e1bee7, #bbdefb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(200, 150, 200, 0.35), 0 0 0 8px rgba(255,255,255,0.5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-circle::before {
+    content: '';
+    position: absolute;
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    top: 25px; left: 35px;
+  }
+
+  .avatar-circle .chibi {
+    font-size: 110px;
+    line-height: 1;
+    z-index: 1;
+    animation: bounce 3s ease-in-out infinite;
+  }
+
+  .avatar-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 55px;
+    height: 55px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    animation: bounce 2s ease-in-out infinite 0.5s;
+  }
+
+  .hero-text {
+    text-align: left;
+    max-width: 400px;
+  }
+
+  .hero-text .greeting {
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-size: 1rem;
+    color: #e91e63;
+    letter-spacing: 2px;
+  }
+
+  .hero-text h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #e91e63, #9c27b0, #3f51b5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 5px 0;
+    font-weight: 700;
+  }
+
+  .hero-text .title-tag {
+    display: inline-block;
+    background: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    color: #7b1fa2;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-top: 6px;
+  }
+
+  .hero-text .title-tag span {
+    margin: 0 4px;
+  }
+
+  /* ===== 卡片通用样式 ===== */
+  .card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 28px 30px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 24px rgba(150, 100, 180, 0.12);
+    border: 2px solid rgba(255,255,255,0.8);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(150, 100, 180, 0.2);
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(255,182,193,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .card-header .icon {
+    font-size: 1.8rem;
+  }
+
+  .card-header h2 {
+    font-family: 'ZCOOL KuaiLe', cursive;
+    font-size: 1.4rem;
+    color: #6a1b9a;
+    letter-spacing: 1px;
+  }
+
+  /* ===== 自我介绍卡片 ===== */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+
+  .intro-item {
+    background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+
+  .intro-item:hover {
+    transform: scale(1.05);
+  }
+
+  .intro-item .label {
+    font-size: 0.8rem;
+    color: #9c27b0;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .intro-item .value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #4a148c;
+  }
+
+  .intro-item.quote {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #fff9c4, #ffecb3);
+    font-style: italic;
+    color: #e65100;
+    font-size: 0.95rem;
+    padding: 12px 20px;
+  }
+
+  .intro-item.quote::before { content: '💬 '; }
+  .intro-item.quote::after  { content: ' ✨'; }
+
+  /* ===== 技能条 ===== */
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .skill-row .skill-name {
+    width: 80px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #6a1b9a;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .skill-bar-bg {
+    flex: 1;
+    height: 18px;
+    background: #f3e5f5;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .skill-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #f48fb1, #ce93d8, #90caf9);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+    position: relative;
+    transition: width 1s ease;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .skill-emoji { font-size: 1.2rem; }
+
+  /* ===== 联系方式 / QR ===== */
+  .contact-layout {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .qr-box {
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .qr-placeholder {
+    width: 160px;
+    height: 160px;
+    background: #fff;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border: 3px dashed #e1bee7;
+    position: relative;
+  }
+
+  .qr-placeholder .qr-icon {
+    font-size: 50px;
+    margin-bottom: 6px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  .qr-placeholder .qr-hint {
+    font-size: 0.75rem;
+    color: #9c27b0;
+  }
+
+  .contact-list {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+    border-radius: 16px;
+    transition: transform 0.2s;
+  }
+
+  .contact-item:hover { transform: translateX(5px); }
+
+  .contact-item .c-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .contact-item .c-info .c-label {
+    font-size: 0.75rem;
+    color: #9c27b0;
+  }
+
+  .contact-item .c-info .c-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #4a148c;
+  }
+
+  /* ===== 页脚 ===== */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    color: #ba68c8;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+
+  .footer .hearts {
+    font-size: 1.2rem;
+    animation: bounce 1.5s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 600px) {
+    .hero-section { flex-direction: column; text-align: center; }
+    .hero-text { text-align: center; }
+    .avatar-circle { width: 150px; height: 150px; }
+    .avatar-circle .chibi { font-size: 80px; }
+    .hero-text h1 { font-size: 1.8rem; }
+    .card { padding: 20px; }
+    .contact-layout { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 背景浮动装饰 -->
+<div class="bg-decorations" id="bgDeco"></div>
+
+<!-- 主容器 -->
+<div class="main-container">
+
+  <!-- 顶部小彩条 -->
+  <div class="top-ribbon">
+    <span class="ribbon-text">🌟 欢迎来到我的小天地 🌟</span>
+  </div>
+
+  <!-- 英雄区域 -->
+  <div class="hero-section">
+    <div class="avatar-wrapper">
+      <div class="avatar-circle">
+        <span class="chibi">🧑‍💼</span>
+      </div>
+      <div class="avatar-badge">📊</div>
+    </div>
+    <div class="hero-text">
+      <div class="greeting">💖 はじめまして ~</div>
+      <h1>小会计</h1>
+      <div class="title-tag">
+        <span>📋</span> 注册会计师 <span>🌸</span> 财务达人 <span>✨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 自我介绍卡片 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📝</span>
+      <h2>关于我</h2>
+    </div>
+    <div class="intro-grid">
+      <div class="intro-item">
+        <div class="label">🎂 星座</div>
+        <div class="value">双鱼座</div>
+      </div>
+      <div class="intro-item">
+        <div class="label">📅 从业年限</div>
+        <div class="value">8 年</div>
+      </div>
+      <div class="intro-item">
+        <div class="label">🎓 学历</div>
+        <div class="value">会计学硕士</div>
+      </div>
+      <div class="intro-item">
+        <div class="label">📍 坐标</div>
+        <div class="value">山东 泰安</div>
+      </div>
+      <div class="intro-item">
+        <div class="label">💼 擅长领域</div>
+        <div class="value">税务筹划 · 财务报表</div>
+      </div>
+      <div class="intro-item">
+        <div class="label">💻 常用工具</div>
+        <div class="value">用友 · SAP · Excel</div>
+      </div>
+      <div class="intro-item quote">
+        数字是我的语言，精准是我的态度。把每一分钱都安排得明明白白！
+      </div>
+    </div>
+  </div>
+
+  <!-- 专业技能卡片 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🌟</span>
+      <h2>专业技能</h2>
+    </div>
+    <div class="skill-row">
+      <span class="skill-emoji">📊</span>
+      <span class="skill-name">财务报表</span>
+      <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:95%"></div></div>
+      <span>95%</span>
+    </div>
+    <div class="skill-row">
+      <span class="skill-emoji">🧾</span>
+      <span class="skill-name">税务筹划</span>
+      <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:90%"></div></div>
+      <span>90%</span>
+    </div>
+    <div class="skill-row">
+      <span class="skill-emoji">💹</span>
+      <span class="skill-name">成本控制</span>
+      <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:88%"></div></div>
+      <span>88%</span>
+    </div>
+    <div class="skill-row">
+      <span class="skill-emoji">🔍</span>
+      <span class="skill-name">审计稽核</span>
+      <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:92%"></div></div>
+      <span>92%</span>
+    </div>
+    <div class="skill-row">
+      <span class="skill-emoji">📈</span>
+      <span class="skill-name">财务分析</span>
+      <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:87%"></div></div>
+      <span>87%</span>
+    </div>
+  </div>
+
+  <!-- 联系方式卡片 -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📬</span>
+      <h2>联系我</h2>
+    </div>
+    <div class="contact-layout">
+      <!-- QR 码 -->
+      <div class="qr-box">
+        <div class="qr-placeholder" id="qrCode">
+          <img src="wechat-qr.jpg" alt="微信二维码" style="width:140px;height:140px;border-radius:12px;">
+        </div>
+        <p style="margin-top:8px;font-size:0.8rem;color:#9c27b0;">扫码添加微信好友 ~</p>
+      </div>
+      <!-- 联系方式列表 -->
+      <div class="contact-list">
+        <div class="contact-item">
+          <span class="c-icon">📧</span>
+          <div class="c-info">
+            <div class="c-label">电子邮件</div>
+            <div class="c-value">920353156@qq.com</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="c-icon">📞</span>
+          <div class="c-info">
+            <div class="c-label">联系电话</div>
+            <div class="c-value">15318159752</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="c-icon">💬</span>
+          <div class="c-info">
+            <div class="c-label">微信</div>
+            <div class="c-value">Yizhigaore666</div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <span class="c-icon">🐱</span>
+          <div class="c-info">
+            <div class="c-label">GitHub</div>
+            <div class="c-value">github.com/yizhigaore66</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer">
+    <span class="hearts">💕</span> Made with Love &amp; Numbers <span class="hearts">💕</span>
+    <br>© 2024 小会计 · 每一个数字都值得被温柔对待
+  </div>
+
+</div>
+
+<script>
+// ===== 生成浮动装饰 =====
+const decoContainer = document.getElementById('bgDeco');
+const decorations = ['🌸','✨','⭐','💮','🎀','🍀','💫','🌟','🪷','💖','🍬','🧸'];
+
+for (let i = 0; i < 30; i++) {
+  const el = document.createElement('span');
+  el.className = 'floating';
+  el.textContent = decorations[Math.floor(Math.random() * decorations.length)];
+  el.style.left = Math.random() * 95 + '%';
+  el.style.animationDelay = Math.random() * 12 + 's';
+  el.style.animationDuration = (8 + Math.random() * 14) + 's';
+  el.style.fontSize = (18 + Math.random() * 30) + 'px';
+  decoContainer.appendChild(el);
+}
+</script>
+
+</body>
+</html>
