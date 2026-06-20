@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>给付佳琪</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  overflow:hidden;font-family:'Microsoft YaHei','PingFang SC',sans-serif;
+  cursor:default;user-select:none;
+}
+canvas{position:fixed;top:0;left:0;pointer-events:none;z-index:1}
+.main{position:relative;z-index:10;text-align:center}
+h1{
+  font-size:clamp(2rem,6vw,4.5rem);color:#fff;
+  text-shadow:0 0 40px rgba(255,120,150,0.8),0 0 80px rgba(255,100,130,0.4);
+  animation:fadeIn 2s ease;
+}
+.name{
+  font-size:clamp(2.5rem,8vw,5.5rem);
+  background:linear-gradient(135deg,#ff6b9d,#ff9a76,#fecd7f);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  font-weight:900;letter-spacing:0.1em;
+  animation:glow 2s ease-in-out infinite alternate, fadeIn 3s ease;
+}
+.subtitle{
+  color:rgba(255,255,255,0.85);font-size:clamp(1rem,3vw,1.5rem);
+  margin-top:1.5rem;line-height:2;letter-spacing:0.05em;
+  animation:fadeInUp 3.5s ease;
+}
+.btn{
+  display:inline-block;margin-top:2.5rem;padding:14px 48px;
+  font-size:1.2rem;color:#fff;letter-spacing:0.1em;
+  background:linear-gradient(135deg,#ff6b9d,#ee5a7f);
+  border:none;border-radius:50px;cursor:pointer;
+  box-shadow:0 0 30px rgba(255,107,157,0.5);
+  transition:all 0.3s;animation:fadeInUp 4.5s ease;
+}
+.btn:hover{transform:scale(1.08);box-shadow:0 0 50px rgba(255,107,157,0.8)}
+.hearts{position:fixed;bottom:-50px;font-size:2rem;animation:floatUp 4s ease-in infinite;z-index:5;pointer-events:none;opacity:0.7}
+.hearts.clickable{pointer-events:auto;cursor:pointer}
+#gameBox{position:fixed;bottom:0;left:0;right:0;z-index:50;background:linear-gradient(0deg,rgba(15,12,41,0.95),rgba(15,12,41,0.7));padding:20px 30px;transform:translateY(100%);transition:transform 0.5s ease;display:flex;align-items:center;gap:20px;border-top:2px solid rgba(255,107,157,0.4)}
+#gameBox.show{transform:translateY(0)}
+#progressWrap{flex:1;height:24px;background:rgba(255,255,255,0.1);border-radius:12px;overflow:hidden;position:relative}
+#progressBar{height:100%;width:0;background:linear-gradient(90deg,#ff6b9d,#ff9a76,#fecd7f);border-radius:12px;transition:width 0.4s ease;box-shadow:0 0 20px rgba(255,107,157,0.6)}
+#progressLabel{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:14px;font-weight:bold;text-shadow:0 0 8px rgba(0,0,0,0.6);white-space:nowrap}
+#scoreText{color:#ff9a76;font-size:1.2rem;font-weight:bold;min-width:60px;text-align:center}
+#gameMsg{color:rgba(255,255,255,0.7);font-size:13px;text-align:center;min-width:100px}
+#gameBtn{background:linear-gradient(135deg,#ff6b9d,#ee5a7f);border:none;color:#fff;padding:10px 20px;border-radius:20px;cursor:pointer;font-size:14px;letter-spacing:0.05em;transition:all 0.3s}
+#gameBtn:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,107,157,0.6)}
+@keyframes heartPop{0%{transform:scale(1)}50%{transform:scale(1.8);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%{filter:brightness(1)}100%{filter:brightness(1.3)}}
+@keyframes floatUp{0%{transform:translateY(0) rotate(0deg);opacity:0.8}100%{transform:translateY(-110vh) rotate(360deg);opacity:0}}
+@keyframes star{0%,100%{opacity:0.3}50%{opacity:1}}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<canvas id="fireworks"></canvas>
+
+<div class="main">
+  <h1>我喜欢你</h1>
+  <div class="name">付佳琪</div>
+  <p class="subtitle">
+    你是这浩瀚星河里<br>
+    我最想遇见的那一颗 🌟<br><br>
+    从看见你的第一眼起<br>
+    我的世界就有了光
+  </p>
+  <button class="btn" onclick="showLove()">💌 点我</button>
+</div>
+
+<!-- Audio -->
+<audio id="bgm" loop autoplay preload="auto">
+  <source src="6月21日.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Floating hearts -->
+<div id="heartsContainer"></div>
+
+<!-- Game bar -->
+<div id="gameBox">
+  <span id="scoreText">💘x0</span>
+  <div id="progressWrap"><div id="progressBar"></div><span id="progressLabel">CP进度 0%</span></div>
+  <span id="gameMsg">抓住飘过的心心~</span>
+  <button id="gameBtn" onclick="startGame()">🎮 开始游戏</button>
+</div>
+
+<script>
+// === Star background ===
+const sc=document.getElementById('stars');
+sc.width=window.innerWidth;sc.height=window.innerHeight;
+const sctx=sc.getContext('2d');
+const stars=[];
+for(let i=0;i<200;i++){
+  stars.push({x:Math.random()*sc.width,y:Math.random()*sc.height,
+    r:Math.random()*1.8+0.3,twinkle:Math.random()*Math.PI*2,
+    speed:Math.random()*0.02+0.005});
+}
+function drawStars(){
+  sctx.clearRect(0,0,sc.width,sc.height);
+  stars.forEach(s=>{
+    s.twinkle+=s.speed;
+    const alpha=0.3+Math.sin(s.twinkle)*0.5;
+    sctx.beginPath();sctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    sctx.fillStyle=`rgba(255,255,255,${Math.max(0.1,alpha)})`;sctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// === Floating hearts ===
+let gameActive=false,score=0;
+function spawnHeart(){
+  const h=document.createElement('div');h.className='hearts';
+  h.textContent=['💕','💖','💗','💝','✨','💫','🩷','🌷'][Math.floor(Math.random()*8)];
+  h.style.left=Math.random()*90+'%';
+  h.style.animationDuration=(Math.random()*3+5)+'s';
+  h.style.fontSize=(Math.random()*2+1.5)+'rem';
+  if(gameActive){
+    h.classList.add('clickable');
+    h.addEventListener('click',(e)=>{catchHeart(h,e)});
+  }
+  document.getElementById('heartsContainer').appendChild(h);
+  setTimeout(()=>h.remove(),6000);
+}
+setInterval(spawnHeart,500);
+
+// === Heart catching game ===
+function startGame(){
+  gameActive=true;score=0;
+  document.getElementById('gameBox').classList.add('show');
+  document.getElementById('scoreText').textContent='💘x0';
+  document.getElementById('gameMsg').textContent='快抓飘过的心心！';
+  updateProgress();
+  // Make existing hearts clickable
+  document.querySelectorAll('.hearts').forEach(h=>h.classList.add('clickable'));
+}
+const milestones=[30,60,90,100];
+const messages=[
+  '💗 有点心动...','💘 双向奔赴~',
+  '💝 命中注定！','💍 一辈子锁死！'
+];
+
+function catchHeart(heart,event){
+  if(!gameActive)return;
+  heart.style.animation='heartPop 0.3s ease forwards';
+  heart.style.pointerEvents='none';
+  heart.style.left=heart.style.left; // keep position
+  setTimeout(()=>heart.remove(),300);
+  score+=30;
+  document.getElementById('scoreText').textContent='💘x'+score;
+  // Spawn spark
+  const spark=document.createElement('div');
+  spark.textContent='✨';
+  spark.style.cssText=`position:fixed;top:${event.clientY}px;left:${event.clientX}px;font-size:1.5rem;z-index:60;pointer-events:none;animation:floatUp 1s ease forwards`;
+  document.body.appendChild(spark);
+  setTimeout(()=>spark.remove(),1000);
+  updateProgress();
+}
+
+function updateProgress(){
+  const pct=Math.min(score/100*100,100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`CP进度 ${Math.floor(pct)}%`;
+  // Milestone
+  for(let i=milestones.length-1;i>=0;i--){
+    if(score>=milestones[i]){
+      document.getElementById('gameMsg').textContent=messages[i];
+      if(score===milestones[i]){ // Just hit milestone
+        for(let j=0;j<10;j++){setTimeout(spawnHeart,j*50)}
+        launchFirework();
+      }
+      break;
+    }
+  }
+  if(pct>=100){
+    document.getElementById('gameMsg').textContent='🎉 你们是天造地设的一对！';
+  }
+}
+startGame(); // auto start
+
+// === Fireworks canvas ===
+const fc=document.getElementById('fireworks');
+fc.width=window.innerWidth;fc.height=window.innerHeight;
+const ctx=fc.getContext('2d');
+fc.style.zIndex='20';
+
+let fireworks=[]; // active fireworks particles
+let rockets=[];   // rising rockets
+
+const colors=['#ff6b9d','#ff9a76','#fecd7f','#ff477e','#ff85a2',
+              '#ffd166','#ef476f','#06d6a0','#118ab2','#ffb3c6',
+              '#ff8fab','#ffc2d1','#f7aef8','#ffe74c'];
+
+class Particle{
+  constructor(x,y,vx,vy,color,life){
+    this.x=x;this.y=y;this.vx=vx;this.vy=vy;
+    this.color=color;this.life=life;this.maxLife=life;
+    this.gravity=0.06;this.friction=0.98;
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    this.vy+=this.gravity;this.vx*=this.friction;this.vy*=this.friction;
+    this.life--;
+  }
+  draw(){
+    const alpha=this.life/this.maxLife;
+    const size=alpha*3+0.5;
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.beginPath();ctx.arc(this.x,this.y,size,0,Math.PI*2);
+    ctx.fillStyle=this.color;ctx.fill();
+    // Glow
+    ctx.beginPath();ctx.arc(this.x,this.y,size*2.5,0,Math.PI*2);
+    ctx.fillStyle=this.color;ctx.globalAlpha=alpha*0.3;ctx.fill();
+    ctx.restore();
+  }
+}
+
+class Rocket{
+  constructor(sx,tx,ty){
+    this.x=sx;this.y=fc.height+10;
+    this.tx=tx;this.ty=ty;
+    this.vx=(tx-sx)*0.03;this.vy=-(8+Math.random()*4);
+    this.alive=true;this.trail=[];
+    const h=Math.random()*360;
+    this.color=`hsl(${h},90%,65%)`;
+  }
+  update(){
+    this.x+=this.vx;this.y+=this.vy;
+    this.vy+=0.04; // slight deceleration
+    this.trail.push({x:this.x,y:this.y,life:5});
+    if(this.y<=this.ty){this.alive=false;this.explode()}
+  }
+  explode(){
+    const n=80+Math.floor(Math.random()*60);
+    const hue=Math.floor(Math.random()*360);
+    for(let i=0;i<n;i++){
+      const angle=(Math.PI*2/n)*i+Math.random()*0.3;
+      const speed=2+Math.random()*6;
+      const vx=Math.cos(angle)*speed;
+      const vy=Math.sin(angle)*speed;
+      const life=40+Math.floor(Math.random()*50);
+      fireworks.push(new Particle(this.x,this.y,vx,vy,`hsl(${hue},90%,${55+Math.random()*35}%)`,life));
+    }
+    // Inner sparkle ring
+    for(let i=0;i<30;i++){
+      const angle=Math.random()*Math.PI*2;
+      const speed=1+Math.random()*2;
+      fireworks.push(new Particle(this.x,this.y,Math.cos(angle)*speed,Math.sin(angle)*speed,'#ffffff',20+Math.random()*20));
+    }
+  }
+  draw(){
+    // Trail
+    for(let i=this.trail.length-1;i>=0;i--){
+      const t=this.trail[i];
+      t.life--;
+      if(t.life<=0){this.trail.splice(i,1);continue}
+      ctx.beginPath();ctx.arc(t.x,t.y,2,0,Math.PI*2);
+      ctx.fillStyle=this.color;ctx.globalAlpha=t.life/5;ctx.fill();
+      ctx.globalAlpha=1;
+    }
+    // Rocket head
+    ctx.beginPath();ctx.arc(this.x,this.y,3,0,Math.PI*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.beginPath();ctx.arc(this.x,this.y,6,0,Math.PI*2);
+    ctx.fillStyle=this.color;ctx.globalAlpha=0.6;ctx.fill();
+    ctx.globalAlpha=1;
+  }
+}
+
+function launchFirework(){
+  const sx=fc.width*0.2+Math.random()*fc.width*0.6;
+  const tx=sx+(Math.random()-0.5)*150;
+  const ty=fc.height*0.1+Math.random()*fc.height*0.45;
+  rockets.push(new Rocket(sx,tx,ty));
+}
+
+// Firework loop
+function drawFireworks(){
+  ctx.clearRect(0,0,fc.width,fc.height);
+  rockets.forEach((r,i)=>{r.update();r.draw();if(!r.alive)rockets.splice(i,1)});
+  fireworks.forEach((p,i)=>{p.update();p.draw();if(p.life<=0)fireworks.splice(i,1)});
+  requestAnimationFrame(drawFireworks);
+}
+drawFireworks();
+
+// Background auto fireworks every few seconds
+setInterval(()=>{if(rockets.length<2)launchFirework()},2500);
+
+// === Click surprise ===
+let clicked=false;
+function showLove(){
+  // Start music on first click
+  const bgm=document.getElementById('bgm');
+  if(!clicked){
+    bgm.volume=0.5;
+    bgm.play().catch(()=>{});
+    clicked=true;
+  }
+
+  // Burst hearts
+  for(let i=0;i<30;i++){setTimeout(spawnHeart,i*50)}
+
+  // Center message
+  spawnMsg(50,50,'付佳琪','我们要组一辈子cp 💕');
+  // Left message
+  setTimeout(()=>spawnMsg(15,40,'','我们要组一辈子cp 💕'),600);
+  setTimeout(()=>spawnMsg(10,60,'','一辈子 💫'),1200);
+  // Right message
+  setTimeout(()=>spawnMsg(80,35,'','我们要组一辈子cp 💕'),900);
+  setTimeout(()=>spawnMsg(85,55,'','永远不分开 💝'),1500);
+
+  // Massive firework show
+  for(let i=0;i<15;i++){
+    setTimeout(()=>launchFirework(),i*200);
+  }
+}
+
+function spawnMsg(left,top,title,sub){
+  const msg=document.createElement('div');
+  const tl=title?`${title}<br>`:'';
+  msg.innerHTML=`${tl}<span style="font-size:${title?'1.2rem':'1.5rem'}">${sub}</span>`;
+  msg.style.cssText=`position:fixed;top:${top}%;left:${left}%;transform:translate(-50%,-50%);
+    z-index:100;font-size:2rem;color:#ff6b9d;text-shadow:0 0 50px rgba(255,107,157,1),0 0 100px rgba(255,100,150,0.6);
+    animation:fadeInUp 0.6s ease,fadeOut 1s ease 3.5s forwards;text-align:center;pointer-events:none`;
+  document.body.appendChild(msg);
+  setTimeout(()=>msg.remove(),5000);
+}
+
+// Add fadeOut keyframe
+const style=document.createElement('style');
+style.textContent='@keyframes fadeOut{to{opacity:0;transform:translate(-50%,-80%)}}';
+document.head.appendChild(style);
+
+// Auto-play fallback: if blocked, play on first click anywhere
+const bgmEl=document.getElementById('bgm');
+bgmEl.volume=0.5;
+bgmEl.play().then(()=>{}).catch(()=>{
+  document.addEventListener('click',()=>{bgmEl.play()},{once:true});
+});
+
+window.addEventListener('resize',()=>{
+  sc.width=innerWidth;sc.height=innerHeight;
+  fc.width=innerWidth;fc.height=innerHeight;
+});
+</script>
+</body>
+</html>
